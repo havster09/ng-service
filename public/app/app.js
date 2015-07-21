@@ -1,6 +1,6 @@
 (function() {
 
-    var app = angular.module('app', []);
+    var app = angular.module('app', ['ngRoute']);
 
     app.provider('books',['constants',function(constants){
         this.$get = function(){
@@ -23,9 +23,27 @@
     }]);
 
     //Can only inject providers and contant services into config
-    app.config(function(booksProvider,constants){ //booksProvider is built automatically by angular 'books' +'Provider'
+    app.config(['booksProvider', '$routeProvider',function(booksProvider,$routeProvider, constants){ //booksProvider is built automatically by angular 'books' +'Provider'
         booksProvider.setIncldeVersionInTitle(true);
-        console.log('title: '+ constants.APP_TITLE);
-    })
+
+        $routeProvider
+            .when('/',{
+                templateUrl:'/app/templates/books.html',
+                controller:'BooksController',
+                controllerAs:'books'
+            })
+            .when('/AddBook',{
+                templateUrl:'/app/templates/addBook.html',
+                controller:'AddBookController',
+                controllerAs:'addBooks'
+            })
+            .when('/EditBook/:bookID/:smshit/:smshitty',{
+                templateUrl:'/app/templates/editBook.html',
+                controller:'EditBookController',
+                controllerAs:'editBooks'
+            })
+            .otherwise('/');
+
+    }]);
 
 }());
