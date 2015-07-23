@@ -57,6 +57,7 @@
 
         function getReadersSuccess(data){
             vm.allReaders = data;
+            $log.log('all readers retrieved');
         }
 
         vm.deleteBook = function(bookId){

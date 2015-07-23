@@ -23,10 +23,12 @@
     }]);
 
     //Can only inject providers and contant services into config
-    app.config(['booksProvider', '$routeProvider','$httpProvider','$logProvider',function(booksProvider,$routeProvider, $httpProvider,$logProvider){ //booksProvider is built automatically by angular 'books' +'Provider'
+    app.config(['booksProvider', '$routeProvider','$httpProvider','$logProvider','$provide',function(booksProvider,$routeProvider, $httpProvider,$logProvider,$provide){ //booksProvider is built automatically by angular 'books' +'Provider'
         booksProvider.setIncldeVersionInTitle(true);
         $logProvider.debugEnabled(true);
         $httpProvider.interceptors.push('bookLoggerInterceptor')
+
+        $provide.decorator('$log',['$delegate','books',logDecorator]);
 
         $routeProvider
             .when('/',{
@@ -48,6 +50,33 @@
 
     }]);
 
+    function logDecorator($delegate,books){
+        function log(message){
+            message += ' - ' + new Date() + ' (' + books.appName + ')';
+            $delegate.log(message);
+        }
+        function info(message){
+            $delegate.info(message);
+        }
+        function warn(message){
+            $delegate.warn(message);
+        }
+        function error(message){
+            $delegate.error(message);
+        }
+        function debug(message){
+            $delegate.debug(message);
+        }
+
+        return{
+            log:log,
+            info:info,
+            warn:warn,
+            error:error,
+            debug:debug
+        }
+    }
+
     app.run(['$rootScope',function($rootScope){
         $rootScope.$on('$routeChangeSuccess',function(event,current,previous){
             console.log('successfully changing routes');
@@ -61,7 +90,6 @@
 
         });
     }
-
     ])
 
 }());
