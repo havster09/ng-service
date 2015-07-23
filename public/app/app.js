@@ -1,6 +1,6 @@
 (function() {
 
-    var app = angular.module('app', ['ngRoute']);
+    var app = angular.module('app', ['ngRoute','ngCookies','ngResource']);
 
     app.provider('books',['constants',function(constants){
         this.$get = function(){
@@ -23,8 +23,10 @@
     }]);
 
     //Can only inject providers and contant services into config
-    app.config(['booksProvider', '$routeProvider',function(booksProvider,$routeProvider, constants){ //booksProvider is built automatically by angular 'books' +'Provider'
+    app.config(['booksProvider', '$routeProvider','$httpProvider','$logProvider',function(booksProvider,$routeProvider, $httpProvider,$logProvider){ //booksProvider is built automatically by angular 'books' +'Provider'
         booksProvider.setIncldeVersionInTitle(true);
+        $logProvider.debugEnabled(true);
+        $httpProvider.interceptors.push('bookLoggerInterceptor')
 
         $routeProvider
             .when('/',{
@@ -35,15 +37,31 @@
             .when('/AddBook',{
                 templateUrl:'/app/templates/addBook.html',
                 controller:'AddBookController',
-                controllerAs:'addBooks'
+                controllerAs:'bookAdder'
             })
-            .when('/EditBook/:bookID/:smshit/:smshitty',{
+            .when('/EditBook/:bookID',{
                 templateUrl:'/app/templates/editBook.html',
                 controller:'EditBookController',
-                controllerAs:'editBooks'
+                controllerAs:'bookEditor'
             })
             .otherwise('/');
 
     }]);
+
+    app.run(['$rootScope',function($rootScope){
+        $rootScope.$on('$routeChangeSuccess',function(event,current,previous){
+            console.log('successfully changing routes');
+        });
+        $rootScope.$on('$routeChangeError',function(event,current,previous){
+            console.log('error changing routes');
+
+            console.log(event);
+            console.log(current);
+            console.log(previous);
+
+        });
+    }
+
+    ])
 
 }());

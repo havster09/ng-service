@@ -1,19 +1,51 @@
 (function () {
 
     angular.module('app')
-        .controller('EditBookController', ['$routeParams','dataService',EditBookController]);
+        .controller('EditBookController', ['$routeParams','$cookies','$cookieStore','dataService','$log','$location','BooksResource','currentUser',EditBookController]);
 
-    function EditBookController($routeParams,dataService) {
-        console.log($routeParams.smshit, $routeParams.smshitty);
+    function EditBookController($routeParams,$cookies,$cookieStore,dataService,$log,$location,BooksResource,currentUser) {
 
         var vm = this;
 
-        dataService.getAllBooks()
-            .then(function(books) {
-                vm.currentBook = books.filter(function(item) {
-                    return item.book_id == $routeParams.bookID;
-                })[0];
-            });
+        dataService.getBookByID($routeParams.bookID)
+            .then(getBookSuccess)
+            .catch(getBookError);
+
+        /*vm.currentBook = BooksResource.get({
+            book_id:$routeParams.bookID
+        });*/
+
+
+        $log.log(vm.currentBook);
+
+        function getBookSuccess(book){
+            vm.currentBook = book;
+            currentUser.lastBookEdited = vm.currentBook;
+        }
+
+        function getBookError(reason){
+            $log.error(reason);
+        }
+
+        vm.saveBook = function(){
+            dataService.updateBook(vm.currentBook)
+                .then(updateBookSuccess)
+                .catch(updateBookError)
+        }
+
+        function updateBookSuccess(message){
+            $log.info(message);
+            $location.path("/");
+        }
+
+        function updateBookError(errorMessage){
+            $log.error(errorMessage);
+        }
+
+        vm.setAsFavourite = function(){
+            $cookies.favouriteBook = vm.currentBook.title;
+        };
+
 
 
 
